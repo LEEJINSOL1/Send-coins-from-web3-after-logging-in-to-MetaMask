@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask Polygon Transfer</title>
+</head>
+<body>
+    <button id="loginButton">Login with MetaMask</button>
+    <br>
+    
+
+    <button id="transferButton" style="display:none;">Transfer Polygon</button>
+
+    <button id="switchToMainnetButton">Switch to Mainnet</button>
+    <button id="switchToTestnetButton">Switch to Testnet</button>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+    <script src="app.js"></script>
+    <script>
+        // 메타마스크에 로그인하는 함수 <간단하게 메타마스크 로그인 후 폴리곤 전송하는 코드 >
+        async function loginWithMetaMask() {
+            try {
+                if (window.ethereum) {
+                    await window.ethereum.enable();
+                    alert('로그인 성공!'); // 로그인이 성공하면 알림 표시
+                    document.getElementById('loginButton').style.display = 'none'; // 로그인 버튼 감춤
+                    document.getElementById('transferButton').style.display = 'block'; // 폴리곤 전송 버튼 표시
+                    
+                } else {
+                    alert('메타마스크를 설치하세요.');
+                }
+            } catch (error) {
+                alert('로그인 중 오류가 발생했습니다: ' + error.message);
+                console.error(error);
+            }
+        }
+
+        // 버튼 클릭 시 메타마스크에 로그인하는 함수 호출
+        document.getElementById('loginButton').addEventListener('click', function() {
+            loginWithMetaMask();
+        });
+
+        // 버튼 클릭 시 폴리곤을 전송하는 함수 호출
+        document.getElementById('transferButton').addEventListener('click', async function() {
+            try {
+                // 현재 계정 가져오기
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const currentAccount = accounts[0];
+                
+                // 메타마스크가 제공하는 web3 객체 가져오기
+                const web3 = new Web3(window.ethereum);
+                
+                // 폴리곤 전송
+                const receiverAddress = '0x9aEe766F285A8A644DA63FFfEc2Ba880DCEa7bF0'; // 수신자의 주소
+                const amountToSend = web3.utils.toWei('0.1', 'ether'); // 1 폴리곤을 wei로 변환
+                
+                const transaction = {
+                    from: currentAccount,
+                    to: receiverAddress,
+                    value: amountToSend
+                };
+
+                
+                
+                
+                const transactionHash = await web3.eth.sendTransaction(transaction);
+                console.log('Transaction Hash:', transactionHash);
+                alert('폴리곤 전송이 완료되었습니다.');
+            } catch (error) {
+                alert('폴리곤 전송 중 오류가 발생했습니다: ' + error.message);
+                console.error(error);
+            }
+        });
+
+
+       // 네트워크 변경 함수
+        async function switchNetwork(networkId) {
+            try {
+                await window.ethereum.request({
+                    method: 'wallet_switchEthereumChain',
+                    params: [{ chainId: '0x' + networkId.toString(16) }]
+                });
+                alert('네트워크 변경 완료!');
+            } catch (error) {
+                console.error('네트워크 변경 오류:', error);
+                alert('네트워크 변경 중 오류가 발생했습니다: ' + error.message);
+            }
+        }
+
+        // 버튼 클릭 시 메인넷으로 변경하는 함수 호출
+        document.getElementById('switchToMainnetButton').addEventListener('click', function() {
+            switchNetwork(137); // 메인넷의 chainId는 137입니다.
+        });
+
+        // 버튼 클릭 시 테스트넷으로 변경하는 함수 호출
+        document.getElementById('switchToTestnetButton').addEventListener('click', function() {
+            switchNetwork(80001); // Polygon 테스트넷의 chainId는 80001입니다.
+        });
+    </script>
+</body>
+</html>
